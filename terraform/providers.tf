@@ -2,26 +2,38 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
+provider "azurerm" {
+  features {}
+}
+
+provider "azuread" {}
+
+data "azurerm_client_config" "current" {}
+
+resource "random_string" "suffix" {
+  length  = 6
+  upper   = false
+  special = false
 }
 
 locals {
-  project        = "lab1"
-  ecr_repository = "lab1-api"
-  ecs_cluster    = "lab1-cluster"
-  ecs_service    = "lab1-api"
-  container_name = "api"
-  container_port = 8000
-  db_name        = "lab1"
-  db_username    = "lab1"
+  name     = "lab1"
+  location = var.location
 
   tags = {
     Project   = "lab1"

@@ -1,11 +1,11 @@
-variable "aws_region" {
-  description = "Регіон AWS, у якому створюється інфраструктура"
+variable "location" {
+  description = "Регіон Azure"
   type        = string
-  default     = "eu-north-1"
+  default     = "westeurope"
 }
 
 variable "db_password" {
-  description = "Пароль майстер-користувача RDS PostgreSQL. Не використовуйте символи /, @, пробіл і лапки."
+  description = "Пароль адміністратора PostgreSQL. Щонайменше 8 символів, великі й малі літери та цифра."
   type        = string
   sensitive   = true
 
@@ -16,7 +16,7 @@ variable "db_password" {
 }
 
 variable "github_repo" {
-  description = "Репозиторій GitHub у форматі owner/name, якому дозволено деплой через OIDC"
+  description = "Репозиторій GitHub у форматі owner/name, якому дозволено деплой"
   type        = string
 
   validation {
@@ -26,6 +26,6 @@ variable "github_repo" {
 }
 
 variable "alert_email" {
-  description = "Email для підтвердження підписки на SNS-сповіщення CloudWatch"
+  description = "Email для сповіщень Azure Monitor"
   type        = string
 }
