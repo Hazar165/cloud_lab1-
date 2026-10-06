@@ -1,7 +1,7 @@
 variable "location" {
   description = "Регіон Azure"
   type        = string
-  default     = "westeurope"
+  default     = "francecentral"
 }
 
 variable "db_password" {
