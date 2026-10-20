@@ -1,8 +1,10 @@
 import os
+from datetime import datetime
 from urllib.parse import quote_plus
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -45,6 +47,73 @@ def db_check():
             detail="database unavailable",
         ) from None
     return {"database": "ok"}
+
+
+class NoteCreate(BaseModel):
+    message: str = Field(min_length=1, max_length=500)
+
+
+class NoteRead(BaseModel):
+    id: int
+    message: str
+    created_at: datetime
+
+
+def ensure_notes_table() -> None:
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS notes (
+                    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    message TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                )
+                """
+            )
+        )
+
+
+@app.post("/api/notes", response_model=NoteRead, status_code=status.HTTP_201_CREATED)
+def create_note(note: NoteCreate):
+    try:
+        ensure_notes_table()
+        with engine.begin() as connection:
+            row = connection.execute(
+                text(
+                    """
+                    INSERT INTO notes (message)
+                    VALUES (:message)
+                    RETURNING id, message, created_at
+                    """
+                ),
+                {"message": note.message},
+            ).one()
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="database unavailable",
+        ) from None
+    return NoteRead(id=row.id, message=row.message, created_at=row.created_at)
+
+
+@app.get("/api/notes", response_model=list[NoteRead])
+def list_notes():
+    try:
+        ensure_notes_table()
+        with engine.begin() as connection:
+            rows = connection.execute(
+                text("SELECT id, message, created_at FROM notes ORDER BY id")
+            ).all()
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="database unavailable",
+        ) from None
+    return [
+        NoteRead(id=row.id, message=row.message, created_at=row.created_at)
+        for row in rows
+    ]
 
 
 @app.get("/api/protected")

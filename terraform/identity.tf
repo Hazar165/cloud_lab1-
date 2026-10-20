@@ -12,7 +12,8 @@ resource "azuread_application_federated_identity_credential" "github" {
   description    = "GitHub Actions deployments from main"
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
-  subject        = "repo:${var.github_repo}:ref:refs/heads/main"
+  # GitHub надсилає subject з числовими id власника і репозиторію, не з іменами.
+  subject = "repo:Hazar165@150966394/cloud_lab1-@1407074410:ref:refs/heads/main"
 }
 
 resource "azurerm_role_assignment" "github_contributor" {

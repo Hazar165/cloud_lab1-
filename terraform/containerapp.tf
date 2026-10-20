@@ -20,6 +20,10 @@ resource "azurerm_container_app_environment" "main" {
   infrastructure_subnet_id       = azurerm_subnet.apps.id
   internal_load_balancer_enabled = true
   tags                           = local.tags
+
+  lifecycle {
+    ignore_changes = [workload_profile]
+  }
 }
 
 resource "azurerm_container_app" "api" {
@@ -78,9 +82,11 @@ resource "azurerm_container_app" "api" {
   }
 
   ingress {
-    external_enabled = false
-    target_port      = 8000
-    transport        = "http"
+    # Середовище внутрішнє, тож external тут означає доступ із віртуальної мережі, не з інтернету.
+    external_enabled           = true
+    target_port                = 8000
+    transport                  = "http"
+    allow_insecure_connections = true
 
     traffic_weight {
       latest_revision = true
@@ -91,6 +97,7 @@ resource "azurerm_container_app" "api" {
   lifecycle {
     ignore_changes = [
       template[0].container[0].image,
+      workload_profile_name,
     ]
   }
 
