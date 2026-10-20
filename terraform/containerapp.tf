@@ -48,6 +48,16 @@ resource "azurerm_container_app" "api" {
     value = var.db_password
   }
 
+  secret {
+    name  = "jwt-secret"
+    value = var.jwt_secret
+  }
+
+  secret {
+    name  = "api-password"
+    value = var.api_password
+  }
+
   template {
     min_replicas = 1
     max_replicas = 1
@@ -78,11 +88,22 @@ resource "azurerm_container_app" "api" {
         name  = "DB_NAME"
         value = "lab1"
       }
+      env {
+        name  = "API_USERNAME"
+        value = var.api_username
+      }
+      env {
+        name        = "API_PASSWORD"
+        secret_name = "api-password"
+      }
+      env {
+        name        = "JWT_SECRET"
+        secret_name = "jwt-secret"
+      }
     }
   }
 
   ingress {
-    # Середовище внутрішнє, тож external тут означає доступ із віртуальної мережі, не з інтернету.
     external_enabled           = true
     target_port                = 8000
     transport                  = "http"

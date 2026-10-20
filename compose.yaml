@@ -26,6 +26,9 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       DB_NAME: lab1
+      API_USERNAME: lab1
+      API_PASSWORD: lab1
+      JWT_SECRET: lab1-local-jwt-secret
     depends_on:
       db:
         condition: service_healthy

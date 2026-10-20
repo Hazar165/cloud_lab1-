@@ -12,10 +12,13 @@
 |---|---|---|
 | GET | `/health` | Перевірка, що процес живий |
 | GET | `/db-check` | `SELECT 1` до PostgreSQL |
-| POST | `/api/notes` | Записує нотатку в базу. Тіло: `{"message":"..."}` |
-| GET | `/api/notes` | Повертає збережені нотатки |
-| GET | `/api/protected` | Потребує заголовок `Authorization: Bearer my-secret-token` |
+| POST | `/api/token` | Перевіряє логін і повертає JWT. Тіло: `{"username":"...","password":"..."}` |
+| POST | `/api/notes` | Записує нотатку в базу. Потребує JWT |
+| GET | `/api/notes` | Повертає збережені нотатки. Потребує JWT |
+| GET | `/api/protected` | Перевіряє підпис і термін дії JWT. Без токена відповідає 401 |
 | GET | `/docs` | Swagger UI |
+
+Локально користувач `lab1`, пароль `lab1`. У Azure пароль і секрет підпису JWT задані в `terraform.tfvars` і передаються в контейнер як секрети.
 
 ## Локальний запуск
 
